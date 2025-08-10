@@ -1,0 +1,61 @@
+==============================================================================
+INTRODUCTION        *bfg*
+
+`bfg.vim` is a small plugin that integrates `fzf`, `rg`, `fd`.
+
+It requires `fzf`, `rg`, `fd` to be installed and available in your `PATH`.
+
+==============================================================================
+COMMANDS            *bfg-commands*
+
+------------------------------------------------------------------------------
+Buffer              *:Buffer*
+
+:Buffer
+  Search through open buffers.
+>
+    <Return>  switch to selected
+<
+------------------------------------------------------------------------------
+Find                *:Find*
+
+:Find
+  Find files using `fd`.
+>
+    <Return>  open selected
+    <Tab>     select one
+    <Alt-A>   select all
+    <Alt-D>   deselect all
+<
+------------------------------------------------------------------------------
+Grep                *:Grep*
+
+:Grep
+  Search for a pattern in files using `rg`.
+>
+    <Return>  open selected
+    <Tab>     select one
+    <Alt-A>   select all
+    <Alt-D>   deselect all
+    <Alt-Q>   send selected to quickfix list
+<
+==============================================================================
+CONFIGURATION        *bfg-configuration*
+
+------------------------------------------------------------------------------
+g:bfg_grep_ignore    *g:bfg_grep_ignore*
+
+You can configure ignore patterns for |:Grep|.
+Default: `['.git']`
+Example: >
+  let g:bfg_grep_ignore = ['.git', '**/__generated__/**']
+<
+------------------------------------------------------------------------------
+g:bfg_find_ignore    *g:bfg_find_ignore*
+
+You can configure ignore patterns for |:Find|.
+Default: `['.git']`
+Example: >
+  let g:bfg_find_ignore = ['.git', '**/__generated__/**']
+<
+vim:tw=78:et:sw=2:ts=2:ft=help:norl:nowrap:
