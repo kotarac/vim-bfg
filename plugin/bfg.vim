@@ -124,7 +124,7 @@ function! s:GrepSink(lines)
 endfunction
 
 function! s:GrepOpenFile(line)
-  let l:parts = matchlist(a:line, '^\(.*\):\(\d\+\):\(\d\+\):.*$')
+  let l:parts = matchlist(a:line, '^\(.\{-}\):\(\d\+\):\(\d\+\):.*$')
   if !empty(l:parts) && filereadable(l:parts[1])
     let l:file = l:parts[1]
     let l:lnum = l:parts[2]
@@ -139,7 +139,7 @@ endfunction
 function! s:GrepPopulateQuickfix(lines)
   let l:list = []
   for l:line in a:lines
-    let l:parts = matchlist(l:line, '^\(.*\):\(\d\+\):\(\d\+\):\(.*\)$')
+    let l:parts = matchlist(l:line, '^\(.\{-}\):\(\d\+\):\(\d\+\):\(.*\)$')
     if !empty(l:parts) && filereadable(l:parts[1])
       call add(l:list, {
             \ 'filename': l:parts[1],
