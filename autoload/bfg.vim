@@ -163,7 +163,7 @@ function! bfg#Find() abort
         \ ['--multi'],
         \ ['--prompt', 'Find> '],
         \ ['--reverse'],
-        \ ['--scheme', 'path'],
+        \ ['--scheme', 'default'],
         \ ['--bind', 'alt-a:select-all'],
         \ ['--bind', 'alt-d:deselect-all'],
         \ ]
@@ -213,6 +213,7 @@ function! bfg#Buffer() abort
         \ ['--delimiter', ':'],
         \ ['--prompt', 'Buffer> '],
         \ ['--reverse'],
+        \ ['--scheme', 'default'],
         \ ['--with-nth', '2..'],
         \ ]
   call s:fzf(l:opts, l:buffers, function('s:BufferSink'))
