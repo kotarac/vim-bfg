@@ -1,8 +1,13 @@
 # vim-bfg
 
-Small plugin that integrates `fzf`, `rg`, `fd`.
+Small plugin that integrates `fzf` and `rg`.
 
-It requires `fzf`, `rg`, `fd` to be installed and available in your `PATH`.
+It requires `fzf` and `rg` to be installed and available in your `PATH`.
+
+## Requirements
+
+- Neovim 0.5+ or Vim 8.0+ (with `+terminal` and `+timers`).
+- External commands: `fzf` (>= 0.51.0), `rg`.
 
 ## Installation
 
@@ -18,7 +23,7 @@ Search through open buffers.
 
 ### `:Find`
 
-Find files using `fd`.
+Find files using `rg --files`.
 
 - `<Return>` open selected
 - `<Tab>` select one

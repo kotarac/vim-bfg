@@ -1,9 +1,15 @@
 ==============================================================================
 INTRODUCTION        *bfg*
 
-`bfg.vim` is a small plugin that integrates `fzf`, `rg`, `fd`.
+`bfg.vim` is a small plugin that integrates `fzf` and `rg`.
 
-It requires `fzf`, `rg`, `fd` to be installed and available in your `PATH`.
+It requires `fzf` and `rg` to be installed and available in your `PATH`.
+
+==============================================================================
+REQUIREMENTS        *bfg-requirements*
+
+- Neovim 0.5+ or Vim 8.0+ (with +terminal and +timers).
+- External commands: fzf (>= 0.51.0), rg.
 
 ==============================================================================
 COMMANDS            *bfg-commands*
@@ -20,7 +26,7 @@ Buffer              *:Buffer*
 Find                *:Find*
 
 :Find
-  Find files using `fd`.
+  Find files using `rg --files`.
 >
     <Return>  open selected
     <Tab>     select one
