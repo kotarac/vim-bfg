@@ -1,8 +1,8 @@
 # vim-bfg
 
-Small plugin that integrates `fzf`, `rg`, `fd`.
+Small plugin that integrates `fzf` and `rg`.
 
-It requires `fzf`, `rg`, `fd` to be installed and available in your `PATH`.
+It requires a POSIX-compatible operating system and shell, with `fzf` and `rg` installed and available in your `PATH`.
 
 ## Installation
 
@@ -18,7 +18,7 @@ Search through open buffers.
 
 ### `:Find`
 
-Find files using `fd`.
+Find files using `rg --files`.
 
 - `<Return>` open selected
 - `<Tab>` select one
@@ -41,20 +41,28 @@ Search for a pattern in files using `rg`.
 
 You can configure ignore patterns for `:Grep`.
 
-Default: `['.git']`
+Patterns are ripgrep path globs (as used by `rg --glob`). bfg passes each pattern to `rg` as a negated glob by prefixing it with `!`.
+
+Do not include a leading `!` in your patterns.
+
+Default: `['.git/']`
 
 Example:
 ```vim
-let g:bfg_grep_ignore = ['.git', '**/__generated__/**']
+let g:bfg_grep_ignore = ['.git/', '**/__generated__/**']
 ```
 
 ### `g:bfg_find_ignore`
 
 You can configure ignore patterns for `:Find`.
 
-Default: `['.git']`
+Patterns are ripgrep path globs (as used by `rg --glob`). bfg passes each pattern to `rg` as a negated glob by prefixing it with `!`.
+
+Do not include a leading `!` in your patterns.
+
+Default: `['.git/']`
 
 Example:
 ```vim
-let g:bfg_find_ignore = ['.git', '**/__generated__/**']
+let g:bfg_find_ignore = ['.git/', '**/__generated__/**']
 ```

@@ -3,23 +3,36 @@ function! s:CheckExecutable(exe) abort
   if get(s:exec_cache, a:exe, 0)
     return 1
   endif
-
   if !executable(a:exe)
     echohl WarningMsg
     echo 'vim-bfg: ' . a:exe . ' is not installed or not in your PATH'
     echohl None
     return 0
   endif
-
   let s:exec_cache[a:exe] = 1
   return 1
+endfunction
+
+function! s:EscapeBangForShell(cmd) abort
+  if type(a:cmd) isnot# v:t_string
+    return ''
+  endif
+  return substitute(a:cmd, '\(^\|[^\\]\)\zs!', '\\!', 'g')
 endfunction
 
 function! s:fzf(opts, source, sink) abort
   if !s:CheckExecutable('fzf')
     return
   endif
-
+  let l:source_type = type(a:source)
+  if l:source_type isnot# v:t_list && l:source_type isnot# v:t_string
+    echohl WarningMsg | echo 'bfg: invalid source type' | echohl None
+    return
+  endif
+  if l:source_type is# v:t_string && a:source =~# '^\s*$'
+    echohl WarningMsg | echo 'bfg: empty source command' | echohl None
+    return
+  endif
   let l:cmd = 'fzf'
   for l:pair in a:opts
     if len(l:pair) > 1
@@ -28,21 +41,18 @@ function! s:fzf(opts, source, sink) abort
       let l:cmd .= ' ' . l:pair[0]
     endif
   endfor
-
   let l:tmpout = tempname()
-
-  if type(a:source) is# v:t_list
+  if l:source_type is# v:t_list
     let l:tmpin = tempname()
     call writefile(a:source, l:tmpin)
     try
-      execute 'silent !' . 'cat ' . shellescape(l:tmpin) . ' | ' . l:cmd . ' > ' . shellescape(l:tmpout)
+      execute 'silent ! cat ' . shellescape(l:tmpin) . ' | ' . s:EscapeBangForShell(l:cmd) . ' > ' . shellescape(l:tmpout)
     finally
       call delete(l:tmpin)
     endtry
   else
-    execute 'silent !' . a:source . ' | ' . l:cmd . ' > ' . shellescape(l:tmpout)
+    execute 'silent ! ' . s:EscapeBangForShell(a:source) . ' | ' . s:EscapeBangForShell(l:cmd) . ' > ' . shellescape(l:tmpout)
   endif
-
   try
     let l:output = readfile(l:tmpout)
   catch
@@ -52,32 +62,29 @@ function! s:fzf(opts, source, sink) abort
   finally
     call delete(l:tmpout)
   endtry
-
   if v:shell_error != 0 && v:shell_error != 1 && v:shell_error != 130
     echohl WarningMsg | echo 'bfg: fzf error, exit code: ' . v:shell_error | echohl None
     redraw!
     return
   endif
-
   if v:shell_error != 0
     redraw!
     return
   endif
-
   call a:sink(l:output)
-
   redraw!
 endfunction
-
 
 function! bfg#Grep() abort
   if !s:CheckExecutable('rg')
     return
   endif
-
   let l:cmd = 'rg --color=always --trim --max-columns=1024 --max-columns-preview --column --line-number --no-heading --smart-case --hidden'
   for l:pattern in g:bfg_grep_ignore
-    let l:cmd .= ' -g ' . shellescape('\!' . l:pattern)
+    if type(l:pattern) isnot# v:t_string || l:pattern ==# '' || l:pattern ==# '!' || l:pattern[0] ==# '!'
+      continue
+    endif
+    let l:cmd .= ' -g ' . shellescape('!' . l:pattern)
   endfor
   let l:cmd .= ' -- '
   let l:cmd_source = 'true'
@@ -147,15 +154,16 @@ function! s:GrepPopulateQuickfix(lines) abort
   endif
 endfunction
 
-
 function! bfg#Find() abort
-  if !s:CheckExecutable('fd')
+  if !s:CheckExecutable('rg')
     return
   endif
-
-  let l:cmd = 'fd --color=auto --hidden --type f --type l'
+  let l:cmd = 'rg --files --hidden'
   for l:pattern in g:bfg_find_ignore
-    let l:cmd .= ' -E ' . shellescape(l:pattern)
+    if type(l:pattern) isnot# v:t_string || l:pattern ==# '' || l:pattern ==# '!' || l:pattern[0] ==# '!'
+      continue
+    endif
+    let l:cmd .= ' --glob ' . shellescape('!' . l:pattern)
   endfor
   let l:cmd_source = l:cmd
   let l:opts = [
@@ -180,7 +188,6 @@ function! s:FindSink(lines) abort
     endif
   endfor
 endfunction
-
 
 function! bfg#Buffer() abort
   let l:buffers = []

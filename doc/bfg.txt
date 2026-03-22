@@ -1,9 +1,10 @@
 ==============================================================================
 INTRODUCTION        *bfg*
 
-`bfg.vim` is a small plugin that integrates `fzf`, `rg`, `fd`.
+`bfg.vim` is a small plugin that integrates `fzf` and `rg`.
 
-It requires `fzf`, `rg`, `fd` to be installed and available in your `PATH`.
+It requires a POSIX-compatible operating system and shell, with `fzf` and `rg`
+installed and available in your `PATH`.
 
 ==============================================================================
 COMMANDS            *bfg-commands*
@@ -20,7 +21,7 @@ Buffer              *:Buffer*
 Find                *:Find*
 
 :Find
-  Find files using `fd`.
+  Find files using `rg --files`.
 >
     <Return>  open selected
     <Tab>     select one
@@ -46,16 +47,28 @@ CONFIGURATION        *bfg-configuration*
 g:bfg_grep_ignore    *g:bfg_grep_ignore*
 
 You can configure ignore patterns for |:Grep|.
-Default: `['.git']`
+
+Patterns are ripgrep path globs (as used by `rg --glob`). bfg passes each
+pattern to `rg` as a negated glob by prefixing it with `!`.
+
+Do not include a leading `!` in your patterns.
+
+Default: `['.git/']`
 Example: >
-  let g:bfg_grep_ignore = ['.git', '**/__generated__/**']
+  let g:bfg_grep_ignore = ['.git/', '**/__generated__/**']
 <
 ------------------------------------------------------------------------------
 g:bfg_find_ignore    *g:bfg_find_ignore*
 
 You can configure ignore patterns for |:Find|.
-Default: `['.git']`
+
+Patterns are ripgrep path globs (as used by `rg --glob`). bfg passes each
+pattern to `rg` as a negated glob by prefixing it with `!`.
+
+Do not include a leading `!` in your patterns.
+
+Default: `['.git/']`
 Example: >
-  let g:bfg_find_ignore = ['.git', '**/__generated__/**']
+  let g:bfg_find_ignore = ['.git/', '**/__generated__/**']
 <
 vim:tw=78:et:sw=2:ts=2:ft=help:norl:nowrap:
