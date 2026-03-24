@@ -17,7 +17,9 @@ function! s:EscapeBangForShell(cmd) abort
   if type(a:cmd) isnot# v:t_string
     return ''
   endif
-  return substitute(a:cmd, '\(^\|[^\\]\)\zs!', '\\!', 'g')
+  let l:cmd = substitute(a:cmd, '\\\@<!!', '\\!', 'g')
+  let l:cmd = substitute(l:cmd, '\\\@<!%', '\\%', 'g')
+  return substitute(l:cmd, '\\\@<!#', '\\#', 'g')
 endfunction
 
 function! s:fzf(opts, source, sink) abort
@@ -46,12 +48,14 @@ function! s:fzf(opts, source, sink) abort
     let l:tmpin = tempname()
     call writefile(a:source, l:tmpin)
     try
-      execute 'silent ! cat ' . shellescape(l:tmpin) . ' | ' . s:EscapeBangForShell(l:cmd) . ' > ' . shellescape(l:tmpout)
+      let l:shell_cmd = 'cat ' . shellescape(l:tmpin) . ' | ' . l:cmd . ' > ' . shellescape(l:tmpout)
+      execute 'silent ! ' . s:EscapeBangForShell(l:shell_cmd)
     finally
       call delete(l:tmpin)
     endtry
   else
-    execute 'silent ! ' . s:EscapeBangForShell(a:source) . ' | ' . s:EscapeBangForShell(l:cmd) . ' > ' . shellescape(l:tmpout)
+    let l:shell_cmd = a:source . ' | ' . l:cmd . ' > ' . shellescape(l:tmpout)
+    execute 'silent ! ' . s:EscapeBangForShell(l:shell_cmd)
   endif
   try
     let l:output = readfile(l:tmpout)
@@ -79,6 +83,9 @@ function! bfg#Grep() abort
   if !s:CheckExecutable('rg')
     return
   endif
+  if !s:CheckExecutable('awk')
+    return
+  endif
   let l:cmd = 'rg --color=always --trim --max-columns=1024 --max-columns-preview --column --line-number --no-heading --smart-case --hidden'
   for l:pattern in g:bfg_grep_ignore
     if type(l:pattern) isnot# v:t_string || l:pattern ==# '' || l:pattern ==# '!' || l:pattern[0] ==# '!'
@@ -88,7 +95,11 @@ function! bfg#Grep() abort
   endfor
   let l:cmd .= ' -- '
   let l:cmd_source = 'true'
-  let l:cmd_reload = 'test -n {q} && ' . l:cmd . '{q} || true'
+  let l:cmd_build = 'q=$1; main=$(printf "%s" "$q" | awk ''{main=""; i=1; s=$0; n=length(s); while(i<=n){c=substr(s,i,1); if(c=="\\" && substr(s,i+1,1)=="!"){main=main "!"; i+=2; continue} if(c=="!" && (i==1 || substr(s,i-1,1) ~ /[[:blank:]]/)){sub(/[[:blank:]]+$/, "", main); j=i+1; while(j<=n && substr(s,j,1) !~ /[[:blank:]]/) j++; i=j; k=i; while(k<=n && substr(s,k,1) ~ /[[:blank:]]/) k++; if(k>n){i=n+1; continue} if(main=="") while(i<=n && substr(s,i,1) ~ /[[:blank:]]/) i++; continue} main=main c; i++} print main}'' ); excl=$(printf "%s" "$q" | awk ''{i=1; s=$0; n=length(s); while(i<=n){c=substr(s,i,1); if(c=="\\" && substr(s,i+1,1)=="!"){i+=2; continue} if(c=="!" && (i==1 || substr(s,i-1,1) ~ /[[:blank:]]/)){j=i+1; while(j<=n && substr(s,j,1) !~ /[[:blank:]]/) j++; term=substr(s,i+1,j-i-1); if(term!="") print term; i=j; continue} i++}}'' )'
+  let l:cmd_filter = 'BFG_EXCL="$excl" awk ''BEGIN{excl=ENVIRON["BFG_EXCL"]; n=split(excl,terms,"\n"); for(i=1;i<=n;i++){t=terms[i]; if(t!=""){a[t]=1; lo[t]=tolower(t); cs[t]=(t ~ /[A-Z]/)}}} {raw=$0; s=$0; gsub(/\033\[[0-9;]*m/,"",s); sl=tolower(s); for(t in a){if(cs[t]){if(index(s,t)>0) next}else{if(index(sl,lo[t])>0) next}} print raw}'''
+  let l:cmd_run = 'test -n "$main" || exit 0; if test -n "$excl"; then ' . l:cmd . '"$main" | ' . l:cmd_filter . ' || true; else ' . l:cmd . '"$main" || true; fi'
+  let l:cmd_script = l:cmd_build . '; ' . l:cmd_run
+  let l:cmd_reload = 'sh -c ' . shellescape(l:cmd_script) . ' sh {q}'
   let l:opts = [
         \ ['--ansi'],
         \ ['--delimiter', ':'],

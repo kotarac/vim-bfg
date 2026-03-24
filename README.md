@@ -2,7 +2,7 @@
 
 Small plugin that integrates `fzf` and `rg`.
 
-It requires a POSIX-compatible operating system and shell, with `fzf` and `rg` installed and available in your `PATH`.
+It requires a POSIX-compatible operating system and shell, with `fzf`, `rg`, `awk` installed and available in your `PATH`.
 
 ## Installation
 
@@ -34,6 +34,14 @@ Search for a pattern in files using `rg`.
 - `<Alt-A>` select all
 - `<Alt-D>` deselect all
 - `<Alt-Q>` send selected to quickfix list
+
+You can exclude result lines by adding one or more `!TERM` words to the query.
+Example: `TODO !vendor/ !generated`
+
+If the query contains only exclusions, no search is run and the result list will be empty.
+
+To search for a literal term starting with `!`, escape it as `\!TERM`.
+Example: `\!important`
 
 ## Configuration
 
