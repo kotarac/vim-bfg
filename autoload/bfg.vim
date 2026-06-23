@@ -124,11 +124,18 @@ function! s:GrepSink(lines) abort
   if empty(a:lines)
     return
   endif
-  if a:lines[0] ==# 'alt-q'
-    call s:GrepPopulateQuickfix(a:lines[1:])
+  let l:lines = a:lines
+  if l:lines[0] ==# ''
+    let l:lines = l:lines[1:]
+  endif
+  if empty(l:lines)
     return
   endif
-  for l:line in a:lines[1:]
+  if l:lines[0] ==# 'alt-q'
+    call s:GrepPopulateQuickfix(l:lines[1:])
+    return
+  endif
+  for l:line in l:lines
     call s:GrepOpenFile(l:line)
   endfor
 endfunction

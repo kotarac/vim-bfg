@@ -2,7 +2,7 @@
 
 Small plugin that integrates `fzf` and `rg`.
 
-It requires a POSIX-compatible operating system and shell, with `fzf`, `rg`, `awk` installed and available in your `PATH`.
+It requires Vim 8+, a POSIX-compatible operating system and shell, with `fzf`, `rg`, `awk` installed and available in your `PATH`.
 
 ## Installation
 

@@ -1,4 +1,4 @@
-if exists('g:loaded_bfg') || v:version < 700 || &compatible
+if exists('g:loaded_bfg') || v:version < 800 || &compatible
   finish
 endif
 let g:loaded_bfg = 1
